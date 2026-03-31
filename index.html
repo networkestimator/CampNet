@@ -3,961 +3,66 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Campus Network Effort Estimation</title>
+  <title>Campus Network Effort Calculator - Dynamic Builder</title>
   <style>
     :root{
+      --brand:#FF452E;
       --bg:#eef2f7;
       --panel:#ffffff;
-      --panel-soft:#f7f9fc;
       --line:#d7deea;
       --text:#12233d;
       --muted:#5e708c;
-      --navy:#E60028;
-      --navy-2:#E60028;
-      --navy-dark:#B00020;
-      --blue-soft:#eaf1fb;
-      --green:#0f7b6c;
-      --orange:#b35a00;
       --shadow:0 14px 28px rgba(16,35,61,.10);
-      --radius-xl:18px;
-      --radius-lg:14px;
-      --radius-md:10px;
-      --content-max:1260px;
+      --content-max:1440px;
       --page-pad:clamp(20px,3vw,32px);
     }
     *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family: Inter, "Segoe UI", Arial, sans-serif;
-      background:var(--bg);
-      color:var(--text);
-    }
-    .page{
-      max-width:var(--content-max);
-      margin:0 auto 36px;
-      padding:0 var(--page-pad);
-    }
-    .hero{
-  background:#FF452E !important;
-  border-radius:20px !important;
-  padding:24px 24px !important;
-  box-shadow: 0 16px 36px rgba(176,0,32,.18) !important;
-}
-    .hero h1{
-      margin:0 0 8px;
-      font-size:27px;
-      font-weight:800;
-      letter-spacing:-0.02em;
-    }
-    .hero p{
-      margin:0;
-      font-size:14px;
-      color:rgba(255,255,255,.92);
-    }
-    .toolbar{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      margin-bottom:18px;
-    }
-    .btn{
-      border:none;
-      border-radius:10px;
-      min-height:38px;
-      padding:0 14px;
-      font-size:14px;
-      font-weight:600;
-      cursor:pointer;
-      box-shadow:0 6px 14px rgba(16,35,61,.08);
-    }
-    .btn.primary{background:#E60028;color:#fff;
-      background:#E60028 !important;
-      color:#fff;
-    }
-    .btn.secondary{background:#E60028;color:#fff;
-      background:#4f5f7a;
-      color:#fff;
-    }
-    .btn.light{background:#E60028;color:#fff;
-      background:#e9eef6;
-      color:var(--navy-dark);
-      box-shadow:none;
-    }
-    .layout{
-      display:grid;
-      grid-template-columns:340px 1fr;
-      gap:18px;
-      align-items:start;
-    }
-    .panel{
-      background:var(--panel);
-      border:1px solid var(--line);
-      border-radius:14px;
-      box-shadow:var(--shadow);
-      overflow:hidden;
-    }
-    .panel-title{
-  margin:0;
-  padding:14px 16px;
-  font-size:16px;
-  font-weight:800;
-  background:linear-gradient(180deg,#f7f9fd,#eef3f9);
-  border-bottom:1px solid #d7deea;
-  color:#12233d;
-}
-    .panel-body{
-      padding:16px;
-    }
-    .input-grid{
-      display:grid;
-      grid-template-columns:1fr;
-      gap:12px;
-    }
-    .field{
-      display:grid;
-      grid-template-columns:1fr 118px;
-      gap:12px;
-      align-items:center;
-    }
-    .field label{
-      font-size:14px;
-      line-height:1.35;
-      color:var(--text);
-    }
-    input, select{
-      width:100%;
-      height:32px;
-      border:1px solid #bcc8da;
-      border-radius:8px;
-      padding:0 10px;
-      font-size:14px;
-      background:#fff;
-      color:var(--text);
-    }
-    input:focus, select:focus{
-      outline:none;
-      border-color:var(--navy-2);
-      box-shadow:0 0 0 3px rgba(46,99,175,.14);
-    }
-    .summary-grid{
-      display:grid;
-      grid-template-columns:repeat(4,1fr);
-      gap:12px;
-      margin-bottom:14px;
-    }
-    .summary-card{
-      background:var(--panel);
-      border:1px solid var(--line);
-      border-radius:14px;
-      padding:14px 14px 12px;
-      box-shadow:var(--shadow);
-      min-height:84px;
-    }
-    .summary-card .label{
-      display:block;
-      font-size:11px;
-      line-height:1.35;
-      font-weight:700;
-      letter-spacing:.06em;
-      text-transform:uppercase;
-      color:var(--muted);
-      margin-bottom:6px;
-    }
-    .summary-card .value{
-      font-size:20px;
-      font-weight:800;
-      line-height:1.1;
-    }
-    .summary-card .value.green{ color:var(--green); }
-    .summary-card .value.orange{ color:var(--orange); }
-
-    table{
-      width:100%;
-      border-collapse:collapse;
-      font-size:14px;
-    }
-    th, td{
-      border:1px solid #c6d0df;
-      padding:9px 10px;
-      text-align:left;
-      vertical-align:middle;
-    }
-    th{
-      background:#f2f4f8 !important;
-      font-weight:800;
-    }
-    td.num, th.num{ text-align:right; }
-    .stack{
-      display:grid;
-      gap:18px;
-    }
-    .note{
-      color:var(--muted);
-      font-size:12px;
-      margin-top:10px;
-    }
-    .hidden{display:none}
-    @media (max-width: 980px){
-      .layout{grid-template-columns:1fr}
-      .summary-grid{grid-template-columns:repeat(2,1fr)}
-    }
-    @media (max-width: 640px){
-      .field{grid-template-columns:1fr}
-      .summary-grid{grid-template-columns:1fr}
-      .toolbar{flex-direction:column}
-      .btn{width:100%}
-    }
-    @media print{
-      .toolbar{display:none}
-      .page{max-width:none;margin:0;padding:0}
-      .panel,.summary-card,.hero{
-  background:#FF452E !important;
-  border-radius:20px !important;
-  padding:24px 24px !important;
-  box-shadow: 0 16px 36px rgba(176,0,32,.18) !important;
-}
-    }
-  
-body{
-  font-family: "Inter", "Segoe UI", Arial, sans-serif;
-  background: linear-gradient(180deg,#f5f6fa,#eef1f7);
-}
-
-.hero{
-  background:#FF452E !important;
-  border-radius:20px !important;
-  padding:24px 24px !important;
-  box-shadow: 0 16px 36px rgba(176,0,32,.18) !important;
-}
-
-.hero h1{
-  font-size:28px;
-  font-weight:800;
-  letter-spacing:-0.02em;
-}
-
-.btn{
-  border-radius:12px;
-  font-weight:700;
-  letter-spacing:.01em;
-}
-
-.panel{
-  border-radius:16px;
-}
-
-.summary-card{
-  border-radius:16px;
-}
-
-table th{
-  background:#f2f4f8 !important;
-  font-weight:800;
-}
-
-
-
-.summary-card .label{
-  font-size:13px !important;
-  font-weight:800 !important;
-  color:#000000 !important;
-  text-align:center !important;
-}
-
-.summary-card .value{
-  font-size:22px !important;
-  font-weight:700 !important;
-  color:#000000 !important;
-  text-align:center !important;
-}
-
-
-.summary-grid{
-  grid-template-columns: repeat(4, minmax(200px, 1fr)) !important;
-}
-
-.summary-card{
-  text-align:left !important;
-}
-
-.summary-card .label{
-  font-size:12px !important;
-  font-weight:800 !important;
-  color:#000000 !important;
-  text-align:left !important;
-  white-space:nowrap !important;
-}
-
-.summary-card .value{
-  font-size:20px !important;
-  font-weight:700 !important;
-  color:#000000 !important;
-  text-align:left !important;
-}
-
-/* remove colored values */
-.summary-card .value.green,
-.summary-card .value.orange{
-  color:#000000 !important;
-}
-
-/* make page slightly wider */
-.page{
-  max-width:1400px !important;
-}
-
-
-/* Kyndryl-like styling for Project Size */
-#projectSize{
-  font-family: "Segoe UI Black", "Arial Black", sans-serif !important;
-  color: #FF452E !important;
-  font-weight: 900 !important;
-  letter-spacing: 0.5px !important;
-}
-
-
-/* Make all KPI values uniform like Project Size */
-.summary-card .value{
-  font-family: "Segoe UI Black", "Arial Black", sans-serif !important;
-  color: #FF452E !important;
-  font-weight: 900 !important;
-  letter-spacing: 0.5px !important;
-}
-
-
-/* Force ALL KPI values to same red */
-.summary-card .value,
-.summary-card .value *,
-#projectSize,
-#totalEngineering,
-#architectTotal,
-#smeTotal{
-  color:#FF452E !important;
-  font-family:"Segoe UI Black","Arial Black",sans-serif !important;
-  font-weight:900 !important;
-}
-
-</style>
-
-<style id="kyndryl-pro-upgrade">
-:root{
-  --k-red:#E60028;
-  --k-red-dark:#B00020;
-  --k-ink:#121212;
-  --k-text:#1f2937;
-  --k-muted:#667085;
-  --k-bg:#f4f6fb;
-  --k-surface:#ffffff;
-  --k-line:#d8deea;
-}
-body{
-  font-family: Inter, "Aptos", "Segoe UI", Arial, sans-serif !important;
-  background:
-    radial-gradient(circle at top right, rgba(230,0,40,.06), transparent 18%),
-    linear-gradient(180deg, #f7f8fc 0%, #eef2f8 100%) !important;
-  color: var(--k-text) !important;
-}
-.page{
-  max-width: 1280px !important;
-  margin: 28px auto 40px !important;
-}
-.hero{
-  background:#FF452E !important;
-  border-radius:20px !important;
-  padding:24px 24px !important;
-  box-shadow: 0 16px 36px rgba(176,0,32,.18) !important;
-}
-.hero h1{
-  font-size: 30px !important;
-  line-height: 1.08 !important;
-  font-weight: 800 !important;
-  letter-spacing: -0.03em !important;
-  margin-bottom: 8px !important;
-}
-.hero p{
-  font-size: 15px !important;
-  line-height: 1.55 !important;
-  color: rgba(255,255,255,.94) !important;
-}
-.toolbar{
-  gap: 12px !important;
-  margin: 18px 0 20px !important;
-}
-.btn{
-  min-height: 42px !important;
-  border-radius: 12px !important;
-  padding: 0 16px !important;
-  font-weight: 700 !important;
-  transition: transform .14s ease, box-shadow .18s ease, filter .18s ease !important;
-  box-shadow: 0 8px 18px rgba(17,24,39,.08) !important;
-  position: relative;
-}
-.btn:hover{
-  transform: translateY(-1px);
-  filter: brightness(1.02);
-  box-shadow: 0 12px 22px rgba(17,24,39,.12) !important;
-}
-.btn:active{
-  transform: translateY(0);
-}
-.btn.primary, .btn.secondary, .btn.light{
-  background:#FF452E !important;
-  color:#fff !important;
-  border:none !important;
-}
-.layout{
-  gap: 20px !important;
-}
-.panel{
-  border-radius: 18px !important;
-  border: 1px solid var(--k-line) !important;
-  box-shadow: 0 14px 28px rgba(16,35,61,.08) !important;
-  overflow: hidden !important;
-  background: var(--k-surface) !important;
-}
-.panel-title{
-  margin:0;
-  padding:14px 16px;
-  font-size:16px;
-  font-weight:800;
-  background:linear-gradient(180deg,#f7f9fd,#eef3f9);
-  border-bottom:1px solid #d7deea;
-  color:#12233d;
-}
-
-.panel-body{
-  padding: 16px !important;
-}
-.input-grid{
-  gap: 13px !important;
-}
-.field{
-  align-items: center !important;
-}
-.field label{
-  font-size: 14px !important;
-  line-height: 1.35 !important;
-  font-weight: 600 !important;
-  color: #0f172a !important;
-}
-input, select{
-  height: 36px !important;
-  border-radius: 10px !important;
-  border: 1px solid #c2cede !important;
-  background: #fff !important;
-  transition: border-color .16s ease, box-shadow .16s ease !important;
-}
-input:focus, select:focus{
-  border-color: var(--k-red) !important;
-  box-shadow: 0 0 0 4px rgba(230,0,40,.10) !important;
-}
-.summary-grid{
-  gap: 14px !important;
-  margin-bottom: 16px !important;
-}
-.summary-card{
-  border-radius: 16px !important;
-  border: 1px solid var(--k-line) !important;
-  box-shadow: 0 10px 22px rgba(16,35,61,.06) !important;
-  min-height: 94px !important;
-  padding: 14px !important;
-  transition: transform .16s ease, box-shadow .18s ease !important;
-}
-.summary-card:hover{
-  transform: translateY(-2px);
-  box-shadow: 0 14px 26px rgba(16,35,61,.10) !important;
-}
-.summary-card .label{
-  font-size: 11px !important;
-  font-weight: 800 !important;
-  color: var(--k-muted) !important;
-  letter-spacing: .08em !important;
-}
-.summary-card .value{
-  font-size: 18px !important;
-  font-weight: 800 !important;
-  line-height: 1.15 !important;
-  letter-spacing: -0.02em !important;
-  color: #0f172a !important;
-}
-.summary-card .value.green{
-  color: #0f766e !important;
-}
-.summary-card .value.orange{
-  color: #b45309 !important;
-}
-table{
-  border-collapse: separate !important;
-  border-spacing: 0 !important;
-}
-th, td{
-  padding: 10px 10px !important;
-  border-color: #d7deea !important;
-}
-th{
-  background:#f2f4f8 !important;
-  font-size: 13px !important;
-  font-weight: 800 !important;
-  color: #111827 !important;
-}
-tbody tr:nth-child(even) td{
-  background: #fafbfe !important;
-}
-tbody tr:hover td{
-  background: #f7f9fc !important;
-}
-.note{
-  font-size: 12px !important;
-  color: var(--k-muted) !important;
-  margin-top: 12px !important;
-}
-@media (max-width: 640px){
-  .hero h1{font-size: 26px !important;}
-}
-
-.summary-card .label{
-  font-size:13px !important;
-  font-weight:800 !important;
-  color:#000000 !important;
-  text-align:center !important;
-}
-
-.summary-card .value{
-  font-size:22px !important;
-  font-weight:700 !important;
-  color:#000000 !important;
-  text-align:center !important;
-}
-
-
-.summary-grid{
-  grid-template-columns: repeat(4, minmax(200px, 1fr)) !important;
-}
-
-.summary-card{
-  text-align:left !important;
-}
-
-.summary-card .label{
-  font-size:12px !important;
-  font-weight:800 !important;
-  color:#000000 !important;
-  text-align:left !important;
-  white-space:nowrap !important;
-}
-
-.summary-card .value{
-  font-size:20px !important;
-  font-weight:700 !important;
-  color:#000000 !important;
-  text-align:left !important;
-}
-
-/* remove colored values */
-.summary-card .value.green,
-.summary-card .value.orange{
-  color:#000000 !important;
-}
-
-/* make page slightly wider */
-.page{
-  max-width:1400px !important;
-}
-
-
-/* Kyndryl-like styling for Project Size */
-#projectSize{
-  font-family: "Segoe UI Black", "Arial Black", sans-serif !important;
-  color: #FF452E !important;
-  font-weight: 900 !important;
-  letter-spacing: 0.5px !important;
-}
-
-
-/* Make all KPI values uniform like Project Size */
-.summary-card .value{
-  font-family: "Segoe UI Black", "Arial Black", sans-serif !important;
-  color: #FF452E !important;
-  font-weight: 900 !important;
-  letter-spacing: 0.5px !important;
-}
-
-
-/* Force ALL KPI values to same red */
-.summary-card .value,
-.summary-card .value *,
-#projectSize,
-#totalEngineering,
-#architectTotal,
-#smeTotal{
-  color:#FF452E !important;
-  font-family:"Segoe UI Black","Arial Black",sans-serif !important;
-  font-weight:900 !important;
-}
-
-</style>
-
-
-<style>
-.logo-wrap{
-  position:absolute;
-  top:14px;
-  right:18px;
-  background:#ffffff;
-  padding:6px 10px;
-  border-radius:10px;
-  box-shadow:0 6px 14px rgba(0,0,0,.15);
-  display:flex;
-  align-items:center;
-}
-.logo-wrap img{
-  height:22px;
-}
-
-/* button hover animation enhancement */
-.btn{
-  transition: all .2s ease !important;
-}
-.btn:hover{
-  transform: translateY(-2px) scale(1.02);
-  box-shadow:0 14px 24px rgba(0,0,0,.18) !important;
-}
-
-.summary-card .label{
-  font-size:13px !important;
-  font-weight:800 !important;
-  color:#000000 !important;
-  text-align:center !important;
-}
-
-.summary-card .value{
-  font-size:22px !important;
-  font-weight:700 !important;
-  color:#000000 !important;
-  text-align:center !important;
-}
-
-
-.summary-grid{
-  grid-template-columns: repeat(4, minmax(200px, 1fr)) !important;
-}
-
-.summary-card{
-  text-align:left !important;
-}
-
-.summary-card .label{
-  font-size:12px !important;
-  font-weight:800 !important;
-  color:#000000 !important;
-  text-align:left !important;
-  white-space:nowrap !important;
-}
-
-.summary-card .value{
-  font-size:20px !important;
-  font-weight:700 !important;
-  color:#000000 !important;
-  text-align:left !important;
-}
-
-/* remove colored values */
-.summary-card .value.green,
-.summary-card .value.orange{
-  color:#000000 !important;
-}
-
-/* make page slightly wider */
-.page{
-  max-width:1400px !important;
-}
-
-
-/* Kyndryl-like styling for Project Size */
-#projectSize{
-  font-family: "Segoe UI Black", "Arial Black", sans-serif !important;
-  color: #FF452E !important;
-  font-weight: 900 !important;
-  letter-spacing: 0.5px !important;
-}
-
-
-/* Make all KPI values uniform like Project Size */
-.summary-card .value{
-  font-family: "Segoe UI Black", "Arial Black", sans-serif !important;
-  color: #FF452E !important;
-  font-weight: 900 !important;
-  letter-spacing: 0.5px !important;
-}
-
-
-/* Force ALL KPI values to same red */
-.summary-card .value,
-.summary-card .value *,
-#projectSize,
-#totalEngineering,
-#architectTotal,
-#smeTotal{
-  color:#FF452E !important;
-  font-family:"Segoe UI Black","Arial Black",sans-serif !important;
-  font-weight:900 !important;
-}
-
-</style>
-
-
-<style>
-.logo-wrap-left{
-  position:absolute;
-  top:14px;
-  left:18px;
-  display:flex;
-  align-items:center;
-}
-.logo-wrap-left img{
-  height:28px;
-}
-.hero{
-  background:#FF452E !important;
-  border-radius:20px !important;
-  padding:24px 24px !important;
-  box-shadow: 0 16px 36px rgba(176,0,32,.18) !important;
-}
-
-.summary-card .label{
-  font-size:13px !important;
-  font-weight:800 !important;
-  color:#000000 !important;
-  text-align:center !important;
-}
-
-.summary-card .value{
-  font-size:22px !important;
-  font-weight:700 !important;
-  color:#000000 !important;
-  text-align:center !important;
-}
-
-
-.summary-grid{
-  grid-template-columns: repeat(4, minmax(200px, 1fr)) !important;
-}
-
-.summary-card{
-  text-align:left !important;
-}
-
-.summary-card .label{
-  font-size:12px !important;
-  font-weight:800 !important;
-  color:#000000 !important;
-  text-align:left !important;
-  white-space:nowrap !important;
-}
-
-.summary-card .value{
-  font-size:20px !important;
-  font-weight:700 !important;
-  color:#000000 !important;
-  text-align:left !important;
-}
-
-/* remove colored values */
-.summary-card .value.green,
-.summary-card .value.orange{
-  color:#000000 !important;
-}
-
-/* make page slightly wider */
-.page{
-  max-width:1400px !important;
-}
-
-
-/* Kyndryl-like styling for Project Size */
-#projectSize{
-  font-family: "Segoe UI Black", "Arial Black", sans-serif !important;
-  color: #FF452E !important;
-  font-weight: 900 !important;
-  letter-spacing: 0.5px !important;
-}
-
-
-/* Make all KPI values uniform like Project Size */
-.summary-card .value{
-  font-family: "Segoe UI Black", "Arial Black", sans-serif !important;
-  color: #FF452E !important;
-  font-weight: 900 !important;
-  letter-spacing: 0.5px !important;
-}
-
-
-/* Force ALL KPI values to same red */
-.summary-card .value,
-.summary-card .value *,
-#projectSize,
-#totalEngineering,
-#architectTotal,
-#smeTotal{
-  color:#FF452E !important;
-  font-family:"Segoe UI Black","Arial Black",sans-serif !important;
-  font-weight:900 !important;
-}
-
-</style>
-
-
-<style id="fix-header-text">
-.hero h1{ color:#ffffff !important; }
-.hero p{ color:#ffffff !important; }
-
-.summary-card .label{
-  font-size:13px !important;
-  font-weight:800 !important;
-  color:#000000 !important;
-  text-align:center !important;
-}
-
-.summary-card .value{
-  font-size:22px !important;
-  font-weight:700 !important;
-  color:#000000 !important;
-  text-align:center !important;
-}
-
-
-.summary-grid{
-  grid-template-columns: repeat(4, minmax(200px, 1fr)) !important;
-}
-
-.summary-card{
-  text-align:left !important;
-}
-
-.summary-card .label{
-  font-size:12px !important;
-  font-weight:800 !important;
-  color:#000000 !important;
-  text-align:left !important;
-  white-space:nowrap !important;
-}
-
-.summary-card .value{
-  font-size:20px !important;
-  font-weight:700 !important;
-  color:#000000 !important;
-  text-align:left !important;
-}
-
-/* remove colored values */
-.summary-card .value.green,
-.summary-card .value.orange{
-  color:#000000 !important;
-}
-
-/* make page slightly wider */
-.page{
-  max-width:1400px !important;
-}
-
-
-/* Kyndryl-like styling for Project Size */
-#projectSize{
-  font-family: "Segoe UI Black", "Arial Black", sans-serif !important;
-  color: #FF452E !important;
-  font-weight: 900 !important;
-  letter-spacing: 0.5px !important;
-}
-
-
-/* Make all KPI values uniform like Project Size */
-.summary-card .value{
-  font-family: "Segoe UI Black", "Arial Black", sans-serif !important;
-  color: #FF452E !important;
-  font-weight: 900 !important;
-  letter-spacing: 0.5px !important;
-}
-
-
-/* Force ALL KPI values to same red */
-.summary-card .value,
-.summary-card .value *,
-#projectSize,
-#totalEngineering,
-#architectTotal,
-#smeTotal{
-  color:#FF452E !important;
-  font-family:"Segoe UI Black","Arial Black",sans-serif !important;
-  font-weight:900 !important;
-}
-
-</style>
-
-<style id="global-logo-fix">
-.global-logo-row{
-  display:flex;
-  align-items:center;
-  justify-content:flex-start;
-  width:min(100%, var(--content-max));
-  margin:12px auto 10px;
-  padding:0 var(--page-pad);
-  min-height:26px;
-}
-.global-logo{
-  position:static;
-  padding:0;
-  background:transparent;
-  box-shadow:none;
-}
-.global-logo img{
-  display:block;
-  height:24px;
-  width:auto;
-  max-width:160px;
-}
-.logo-wrap-left{
-  display:none !important;
-}
-.hero h1,
-.hero p{
-  text-align:left;
-}
-.footer-center{
-  text-align:center;
-  margin:30px 0 10px;
-  font-size:0;
-  color:#6b7280;
-}
-.footer-center::before{
-  content:"Copyright \00A9 2026 Kyndryl Inc. All rights reserved";
-  font-size:13px;
-}
-@media (max-width:980px){
-  .page{
-    max-width:100%;
-    padding:0 var(--page-pad);
-  }
-  .global-logo-row{
-    margin:10px auto 8px;
-  }
-  .global-logo img{
-    height:22px;
-    max-width:140px;
-  }
-}
-@media (max-width:640px){
-  .global-logo img{
-    height:20px;
-    max-width:120px;
-  }
-}
-@media print{
-  .global-logo-row{
-    display:none;
-  }
-}
-</style>
-
+    body{margin:0;font-family:Inter,"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--text)}
+    .page{max-width:var(--content-max);margin:0 auto 36px;padding:0 var(--page-pad)}
+    .hero{position:relative;background:var(--brand);color:#fff;border-radius:16px;padding:18px 22px;box-shadow:var(--shadow);margin-bottom:16px}
+    .hero img{position:absolute;left:18px;top:16px;height:26px}
+    .hero .title-wrap{padding-left:0;text-align:left}
+    .hero h1{margin:0 0 8px;font-size:27px;font-weight:800;letter-spacing:-0.02em;color:#fff;text-align:left}
+    .hero p{margin:0;font-size:14px;color:#fff;opacity:.95;text-align:left}
+    .toolbar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px}
+    .btn{border:none;border-radius:10px;min-height:38px;padding:0 14px;font-size:14px;font-weight:700;cursor:pointer;background:var(--brand);color:#fff;box-shadow:0 6px 14px rgba(16,35,61,.08)}
+    .btn.secondary{background:#fff;color:var(--brand);border:1px solid #f0b4ab;box-shadow:none}
+    .btn.ghost{background:#fff;color:var(--text);border:1px solid var(--line);box-shadow:none}
+    .layout{display:grid;grid-template-columns:380px 1fr;gap:18px;align-items:start}
+    .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
+    .panel-title{margin:0;padding:14px 16px;font-size:16px;font-weight:800;background:linear-gradient(180deg,#f7f9fd,#eef3f9);border-bottom:1px solid var(--line);color:var(--text)}
+    .panel-body{padding:16px}
+    .section-label{margin:0 0 12px;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:800}
+    .input-grid{display:grid;grid-template-columns:1fr;gap:12px}
+    .field{display:grid;grid-template-columns:1fr 120px;gap:12px;align-items:center}
+    .field.full{grid-template-columns:1fr}
+    .field label{font-size:14px;line-height:1.35;color:var(--text)}
+    input,select{width:100%;height:34px;border:1px solid #bcc8da;border-radius:8px;padding:0 10px;font-size:14px;background:#fff;color:var(--text)}
+    textarea{width:100%;min-height:120px;border:1px solid #bcc8da;border-radius:8px;padding:10px;font-size:13px;background:#fff;color:var(--text);resize:vertical}
+    input:focus,select:focus,textarea:focus{outline:none;border-color:#ff7d6d;box-shadow:0 0 0 3px rgba(255,69,46,.12)}
+    .summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+    .summary-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 14px 12px;box-shadow:var(--shadow);min-height:84px}
+    .summary-card .label{display:block;font-size:12px;line-height:1.35;font-weight:800;text-transform:uppercase;color:#000;margin-bottom:6px;white-space:nowrap}
+    .summary-card .value{font-size:20px;font-weight:900;line-height:1.1;color:var(--brand);font-family:"Segoe UI Black","Arial Black",sans-serif}
+    table{width:100%;border-collapse:collapse;font-size:14px}
+    th,td{border:1px solid #c6d0df;padding:9px 10px;text-align:left;vertical-align:middle}
+    th{background:#f2f6fb;font-weight:800}
+    td.num,th.num{text-align:right}
+    .stack{display:grid;gap:18px}
+    .note{color:var(--muted);font-size:12px;margin-top:10px;line-height:1.5}
+    .mini-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+    .span-2{grid-column:span 2}
+    .admin-card{border:1px dashed #e8a89f;background:#fff9f8;border-radius:12px;padding:12px;margin-top:14px}
+    .pill{display:inline-block;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:700;background:#fff3f1;color:var(--brand);border:1px solid #ffd0ca;margin-left:6px}
+    .footer-center{text-align:center;margin:30px 0 10px;font-size:13px;color:#6b7280}
+    .global-logo-row{display:flex;align-items:center;justify-content:flex-start;width:min(100%, var(--content-max));margin:12px auto 10px;padding:0 var(--page-pad);min-height:26px}
+    .global-logo{position:static;padding:0;background:transparent;box-shadow:none}
+    .global-logo img{display:block;height:24px;width:auto;max-width:160px}
+    @media (max-width:1100px){.layout{grid-template-columns:1fr}.summary-grid{grid-template-columns:repeat(2,1fr)}.hero .title-wrap{padding-left:0;padding-top:0}.hero img{left:22px;top:16px}.page{max-width:100%;padding:0 var(--page-pad)}.global-logo-row{margin:10px auto 8px}.global-logo img{height:22px;max-width:140px}}
+    @media (max-width:640px){.summary-grid{grid-template-columns:1fr}.field{grid-template-columns:1fr}.mini-grid{grid-template-columns:1fr}.toolbar{flex-direction:column}.btn{width:100%}}
+    @media (max-width:640px){.global-logo img{height:20px;max-width:120px}}
+    @media print{.toolbar,.admin-card,.builder-panel,.global-logo-row{display:none}.page{max-width:none;margin:0;padding:0}.panel,.summary-card,.hero{box-shadow:none}}
+  </style>
 </head>
 <body>
   <div class="global-logo-row">
@@ -967,72 +72,111 @@ tbody tr:hover td{
   </div>
   <div class="page">
     <section class="hero">
-      <h1>Campus Network Effort Estimator</h1>
-      <p>Excel-aligned Estimator with deployment characteristics, automatic recalculation, role split, and export support.</p>
+      <div class="title-wrap">
+        <h1>Campus Network Effort Calculator</h1>
+        <p>No-code dynamic version. New project fields can be added on the page and mapped to the formula engine without editing HTML.</p>
+      </div>
     </section>
 
     <div class="toolbar">
-      <button class="btn primary" id="loadSample">Load Sample Values</button>
-      <button class="btn secondary" id="resetInputs">Reset Inputs</button>
-      <button class="btn light" id="exportExcel">Export to Excel</button>
-      <button class="btn light" id="printPdf">Print / Save PDF</button>
+      <button class="btn" id="loadSample">Load Sample Values</button>
+      <button class="btn" id="openBuilder">Customize Fields</button>
+      <button class="btn ghost" id="resetInputs">Reset Inputs</button>
+      <button class="btn ghost" id="exportExcel">Export to Excel</button>
+      <button class="btn ghost" id="printPdf">Print / Save PDF</button>
     </div>
 
     <div class="layout">
       <section class="panel">
         <h2 class="panel-title">Project Inputs</h2>
         <div class="panel-body">
-          <div class="input-grid">
-            <div class="field"><label>Total Core Switches</label><input id="core" type="number" min="0" step="1" value="10"></div>
-            <div class="field"><label>Total Distribution Switches</label><input id="dist" type="number" min="0" step="1" value="20"></div>
-            <div class="field"><label>Total Access Switches</label><input id="access" type="number" min="0" step="1" value="100"></div>
-            <div class="field"><label>Total WAN Edge Routers</label><input id="wan" type="number" min="0" step="1" value="5"></div>
-            <div class="field"><label>Total Firewalls</label><input id="fw" type="number" min="0" step="1" value="5"></div>
-            <div class="field"><label>Total Access Points (APs)</label><input id="ap" type="number" min="0" step="1" value="10"></div>
-            <div class="field"><label>Total WLCs</label><input id="wlc" type="number" min="0" step="1" value="2"></div>
-            <div class="field"><label>Total NAC Nodes</label><input id="nac" type="number" min="0" step="1" value="2"></div>
-            <div class="field"><label>Deployment Type</label>
-              <select id="deploymentType">
-                <option>Greenfield</option>
-                <option>Brownfield</option>
-              </select>
+          <div id="dynamicInputs"></div>
+
+          <div class="admin-card builder-panel" id="builderPanel" style="display:none;">
+            <div class="section-label">Add new input field <span class="pill">No code</span></div>
+            <div class="mini-grid">
+              <div class="field full">
+                <label>Field Label</label>
+                <input id="newLabel" placeholder="Example: Total Routers" />
+              </div>
+              <div class="field full">
+                <label>Field Key</label>
+                <input id="newKey" placeholder="Example: routers" />
+              </div>
+              <div class="field full">
+                <label>Section</label>
+                <select id="newSection">
+                  <option value="Infrastructure Totals (Across All Sites)">Infrastructure Totals (Across All Sites)</option>
+                  <option value="Deployment Characteristics">Deployment Characteristics</option>
+                  <option value="Custom Fields">Custom Fields</option>
+                </select>
+              </div>
+              <div class="field full">
+                <label>Input Type</label>
+                <select id="newType">
+                  <option value="number">Number</option>
+                  <option value="select">Select</option>
+                </select>
+              </div>
+              <div class="field full">
+                <label>Default Value</label>
+                <input id="newDefault" placeholder="0 or Yes" />
+              </div>
+              <div class="field full">
+                <label>Select Options (comma separated, for Select type only)</label>
+                <input id="newOptions" placeholder="Yes,No" />
+              </div>
+              <div class="field full">
+                <label>Formula Role</label>
+                <select id="newRole">
+                  <option value="none">Informational only</option>
+                  <option value="implementation">Implementation component</option>
+                  <option value="trigger">Phase uplift trigger</option>
+                  <option value="size_driver">Project size driver</option>
+                </select>
+              </div>
+              <div class="field full">
+                <label>Hours per Unit (for Implementation role)</label>
+                <input id="newRate" type="number" step="0.01" placeholder="Example: 14" />
+              </div>
+              <div class="field full">
+                <label>Trigger Phase (for Trigger role)</label>
+                <select id="newTriggerPhase">
+                  <option value="discovery">Discovery</option>
+                  <option value="design">Design</option>
+                  <option value="testing">Testing</option>
+                </select>
+              </div>
+              <div class="field full">
+                <label>Trigger Uplift % when value &gt; 0 or Yes</label>
+                <input id="newTriggerPct" type="number" step="0.01" placeholder="Example: 0.15 for 15%" />
+              </div>
+              <div class="field full span-2">
+                <label>Size Thresholds JSON (for Size Driver role only)</label>
+                <input id="newThresholds" placeholder='"small":20,"medium":75,"large":200' />
+              </div>
             </div>
-            <div class="field"><label>802.1X Enforcement Required?</label>
-              <select id="dot1x">
-                <option>No</option>
-                <option>Yes</option>
-              </select>
+            <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="btn" id="addFieldBtn" type="button">Add Field</button>
+              <button class="btn secondary" id="saveSchemaBtn" type="button">Save Customization</button>
+              <button class="btn secondary" id="restoreDefaultsBtn" type="button">Restore Defaults</button>
             </div>
-            <div class="field"><label>Fabric-Based Architecture?</label>
-              <select id="fabric">
-                <option>No</option>
-                <option>Yes</option>
-              </select>
+            <div class="note">
+              Example: to add a new Router input without coding, set <b>Formula Role = Implementation component</b> and enter its <b>Hours per Unit</b>.
+              The new field will immediately affect Implementation hours. Changes are saved in your browser.
             </div>
-            <div class="field"><label>Fabric Domains Count</label><input id="domains" type="number" min="1" step="1" value="1"></div>
           </div>
-          <div class="note" id="domainsNote">Kept at 1 when Fabric = No.</div>
+
+          <div class="note">This version is schema-driven. New fields render automatically from configuration and can safely plug into the calculation engine.</div>
         </div>
       </section>
 
       <section class="stack">
         <div class="summary-grid">
-          <div class="summary-card">
-            <span class="label">Project Size</span>
-            <span class="value" id="projectSize">Large</span>
-          </div>
-          <div class="summary-card">
-            <span class="label">Total Engineering Effort</span>
-            <span class="value green" id="totalEngineering">0</span>
-          </div>
-          <div class="summary-card">
-            <span class="label">Total Architect Hours</span>
-            <span class="value" id="architectTotal">0</span>
-          </div>
-          <div class="summary-card">
-            <span class="label">Total SME Hours</span>
-            <span class="value orange" id="smeTotal">0</span>
-          </div>
+          <div class="summary-card"><span class="label">Project Size</span><span class="value" id="projectSize">Large</span></div>
+          <div class="summary-card"><span class="label">Total Engineering Effort</span><span class="value" id="totalEngineering">0</span></div>
+          <div class="summary-card"><span class="label">Total Architect Hours</span><span class="value" id="architectTotal">0</span></div>
+          <div class="summary-card"><span class="label">Total SME Hours</span><span class="value" id="smeTotal">0</span></div>
         </div>
 
         <section class="panel">
@@ -1053,148 +197,194 @@ tbody tr:hover td{
             </table>
           </div>
         </section>
+
+        <section class="panel">
+          <h2 class="panel-title">Active Formula Mapping</h2>
+          <div class="panel-body">
+            <table>
+              <thead>
+                <tr>
+                  <th>Field</th>
+                  <th>Role</th>
+                  <th class="num">Hours / Unit</th>
+                  <th>Trigger Rule</th>
+                </tr>
+              </thead>
+              <tbody id="mappingBody"></tbody>
+            </table>
+            <div class="note">This section shows exactly how each field participates in the engine, so future additions stay transparent and manageable.</div>
+          </div>
+        </section>
       </section>
     </div>
+
+    <div class="footer-center">Copyright © 2026 Kyndryl Inc. All rights reserved</div>
   </div>
 
   <script>
-    const assumptions = {
+    const STORAGE_KEY = "campus_effort_dynamic_schema_v1";
+    const SAMPLE_INPUTS = {core:10,dist:20,access:100,wan:5,fw:5,ap:10,wlc:2,nac:2,deploymentType:"Greenfield",dot1x:"No",fabric:"No",domains:1};
+
+    const defaultSchema = {
+      sizing: { driverKey: "access", thresholds: { small: 20, medium: 75, large: 200 } },
+      rates: { nacBaseline: 60, nacPerAccess: 1.5, hypercarePct: 0.04 },
+      phaseSplits: {
+        discovery:{arch:0.3,sme:0.7}, design:{arch:0.7,sme:0.3}, testing:{arch:0.3,sme:0.7},
+        implementation:{arch:0.3,sme:0.7}, nac:{arch:0.5,sme:0.5}, hypercare:{arch:0.3,sme:0.7}
+      },
       base: {
-        Small: { discovery: 36, design: 60, testing: 8 },
-        Medium: { discovery: 64, design: 120, testing: 16 },
-        Large: { discovery: 130, design: 220, testing: 24 },
-        "Extra Large": { discovery: 230, design: 350, testing: 32 }
+        Small:{discovery:36,design:60,testing:8},
+        Medium:{discovery:64,design:120,testing:16},
+        Large:{discovery:130,design:220,testing:24},
+        "Extra Large":{discovery:230,design:350,testing:32}
       },
-      implementationRates: {
-        core: 20, dist: 12, access: 8, wan: 14, fw: 120, ap: 0.9, wlc: 30, nac: 18
-      },
-      nacBaseline: 60,
-      nacPerAccess: 1.5,
-      hypercarePct: 0.04
+      fields: [
+        {key:"core", label:"Total Core Switches", type:"number", section:"Infrastructure Totals (Across All Sites)", default:10, role:"implementation", rate:20},
+        {key:"dist", label:"Total Distribution Switches", type:"number", section:"Infrastructure Totals (Across All Sites)", default:20, role:"implementation", rate:12},
+        {key:"access", label:"Total Access Switches", type:"number", section:"Infrastructure Totals (Across All Sites)", default:100, role:"implementation", rate:8},
+        {key:"wan", label:"Total WAN Edge Routers", type:"number", section:"Infrastructure Totals (Across All Sites)", default:5, role:"implementation", rate:14, role2:"trigger", triggerAlso:["discovery:0.15","design:0.2","testing:0.15"]},
+        {key:"fw", label:"Total Firewalls", type:"number", section:"Infrastructure Totals (Across All Sites)", default:5, role:"implementation", rate:120, role2:"trigger", triggerAlso:["discovery:0.25","design:0.2","testing:0.2"]},
+        {key:"ap", label:"Total Access Points (APs)", type:"number", section:"Infrastructure Totals (Across All Sites)", default:10, role:"implementation", rate:0.9},
+        {key:"wlc", label:"Total WLCs", type:"number", section:"Infrastructure Totals (Across All Sites)", default:2, role:"implementation", rate:30},
+        {key:"nac", label:"Total NAC Nodes", type:"number", section:"Infrastructure Totals (Across All Sites)", default:2, role:"implementation", rate:18, role2:"trigger", triggerAlso:["discovery:0.35","design:0.4","testing:0.25"]},
+        {key:"deploymentType", label:"Deployment Type", type:"select", options:["Greenfield","Brownfield"], section:"Deployment Characteristics", default:"Greenfield", role:"none"},
+        {key:"dot1x", label:"802.1X Enforcement Required?", type:"select", options:["No","Yes"], section:"Deployment Characteristics", default:"No", role:"none"},
+        {key:"fabric", label:"Fabric-Based Architecture?", type:"select", options:["No","Yes"], section:"Deployment Characteristics", default:"No", role:"none"},
+        {key:"domains", label:"Fabric Domains Count", type:"number", section:"Deployment Characteristics", default:1, role:"none"}
+      ]
     };
 
-    const split = {
-      discovery: { arch: 0.3, sme: 0.7 },
-      design: { arch: 0.7, sme: 0.3 },
-      testing: { arch: 0.3, sme: 0.7 },
-      implementation: { arch: 0.3, sme: 0.7 },
-      nac: { arch: 0.5, sme: 0.5 },
-      hypercare: { arch: 0.3, sme: 0.7 }
-    };
+    function deepClone(x){ return JSON.parse(JSON.stringify(x)); }
+    function loadSchema(){ const raw = localStorage.getItem(STORAGE_KEY); if (!raw) return deepClone(defaultSchema); try { return JSON.parse(raw); } catch { return deepClone(defaultSchema); } }
+    function saveSchema(schema){ localStorage.setItem(STORAGE_KEY, JSON.stringify(schema)); }
+    let schema = loadSchema();
 
-    const sample = {
-      core:10, dist:20, access:100, wan:5, fw:5, ap:10, wlc:2, nac:2,
-      deploymentType:"Greenfield", dot1x:"No", fabric:"No", domains:1
-    };
+    function fmt(v){ const n = Number(v || 0); return n.toFixed(2).replace(/\.00$/,'').replace(/(\.\d*[1-9])0$/,'$1'); }
+    function getFieldValue(field){ const el = document.getElementById(field.key); if (!el) return field.default ?? 0; if (field.type === "number") return Number(el.value || 0); return el.value; }
+    function groupedFields(){ const groups = {}; schema.fields.forEach(f => { if (!groups[f.section]) groups[f.section] = []; groups[f.section].push(f); }); return groups; }
 
-    function fmt(v){
-      const n = Number(v || 0);
-      return n.toFixed(2).replace(/\.00$/,'').replace(/(\.\d*[1-9])0$/,'$1');
+    function renderInputs(){
+      const host = document.getElementById("dynamicInputs");
+      const groups = groupedFields();
+      host.innerHTML = Object.entries(groups).map(([section, fields]) => `
+        <div style="margin-bottom:18px;">
+          <div class="section-label">${section}</div>
+          <div class="input-grid">
+            ${fields.map(field => `
+              <div class="field">
+                <label for="${field.key}">${field.label}</label>
+                ${field.type === "select"
+                  ? `<select id="${field.key}">${(field.options || []).map(opt => `<option value="${opt}">${opt}</option>`).join("")}</select>`
+                  : `<input id="${field.key}" type="number" min="0" step="1" value="${field.default ?? 0}" />`
+                }
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      `).join("");
+
+      schema.fields.forEach(field => {
+        const el = document.getElementById(field.key);
+        if (!el) return;
+        if (field.default !== undefined) el.value = field.default;
+        el.addEventListener("input", () => { syncSpecialBehavior(); render(); });
+        el.addEventListener("change", () => { syncSpecialBehavior(); render(); });
+      });
+      syncSpecialBehavior();
     }
 
-    function val(id){ return Number(document.getElementById(id).value || 0); }
-
-    function getProjectSize(access){
-      if (access <= 20) return "Small";
-      if (access <= 75) return "Medium";
-      if (access <= 200) return "Large";
-      return "Extra Large";
-    }
-
-    function syncFabricDomains(){
-      const fabric = document.getElementById('fabric').value;
-      const domains = document.getElementById('domains');
-      const note = document.getElementById('domainsNote');
-      if (fabric === 'No'){
-        domains.value = 1;
-        domains.disabled = true;
-        note.textContent = 'Kept at 1 when Fabric = No.';
-      } else {
-        domains.disabled = false;
-        if (Number(domains.value) < 1) domains.value = 1;
-        note.textContent = 'Use 1 or higher when Fabric = Yes.';
+    function syncSpecialBehavior(){
+      const fabricField = document.getElementById("fabric");
+      const domainsField = document.getElementById("domains");
+      if (fabricField && domainsField){
+        if (fabricField.value === "No"){ domainsField.value = 1; domainsField.disabled = true; }
+        else { domainsField.disabled = false; if (Number(domainsField.value) < 1) domainsField.value = 1; }
       }
     }
 
-    function inputs(){
-      syncFabricDomains();
-      return {
-        core: val('core'),
-        dist: val('dist'),
-        access: val('access'),
-        wan: val('wan'),
-        fw: val('fw'),
-        ap: val('ap'),
-        wlc: val('wlc'),
-        nac: val('nac'),
-        deploymentType: document.getElementById('deploymentType').value,
-        dot1x: document.getElementById('dot1x').value,
-        fabric: document.getElementById('fabric').value,
-        domains: val('domains')
-      };
+    function getInputsObject(){ const obj = {}; schema.fields.forEach(f => obj[f.key] = getFieldValue(f)); return obj; }
+
+    function getProjectSize(inputs){
+      const driverKey = schema.sizing.driverKey;
+      const thresholds = schema.sizing.thresholds;
+      const driverValue = Number(inputs[driverKey] || 0);
+      if (driverValue <= thresholds.small) return "Small";
+      if (driverValue <= thresholds.medium) return "Medium";
+      if (driverValue <= thresholds.large) return "Large";
+      return "Extra Large";
     }
 
-    function calculate(i){
-      const size = getProjectSize(i.access);
-      const base = assumptions.base[size];
-      const extraDomains = Math.max(i.domains - 1, 0);
+    function hasActive(field, value){ if (field.type === "select") return String(value).toLowerCase() === "yes"; return Number(value || 0) > 0; }
 
-      const discovery = base.discovery * (
-        1 + (i.deploymentType === 'Brownfield' ? 0.2 : 0) + (i.nac > 0 ? 0.35 : 0) +
-        (i.wan > 0 ? 0.15 : 0) + (i.fw > 0 ? 0.25 : 0) + (i.fabric === 'Yes' ? 0.2 : 0) + (extraDomains * 0.1)
-      );
+    function calculate(inputs){
+      const size = getProjectSize(inputs);
+      const base = schema.base[size];
+      const extraDomains = Math.max(Number(inputs.domains || 1) - 1, 0);
+      let discoveryUplift = 0, designUplift = 0, testingUplift = 0;
+      if (inputs.deploymentType === "Brownfield"){ discoveryUplift += 0.2; designUplift += 0.2; testingUplift += 0.2; }
+      if (inputs.dot1x === "Yes") testingUplift += 0.25;
+      if (inputs.fabric === "Yes"){ discoveryUplift += 0.2; designUplift += 0.3; testingUplift += 0.25; }
+      discoveryUplift += extraDomains * 0.1; designUplift += extraDomains * 0.15; testingUplift += extraDomains * 0.15;
 
-      const design = base.design * (
-        1 + (i.deploymentType === 'Brownfield' ? 0.2 : 0) + (i.nac > 0 ? 0.4 : 0) +
-        (i.wan > 0 ? 0.2 : 0) + (i.fw > 0 ? 0.2 : 0) + (i.fabric === 'Yes' ? 0.3 : 0) + (extraDomains * 0.15)
-      );
+      schema.fields.forEach(field => {
+        const value = inputs[field.key];
+        if ((field.role === "trigger" || field.role2 === "trigger") && hasActive(field, value)) {
+          (field.triggerAlso || []).forEach(rule => {
+            const parts = rule.split(":"); const phase = parts[0]; const pct = Number(parts[1] || 0);
+            if (phase === "discovery") discoveryUplift += pct;
+            if (phase === "design") designUplift += pct;
+            if (phase === "testing") testingUplift += pct;
+          });
+          if (field.role === "trigger"){
+            const pct = Number(field.triggerPct || 0); const phase = field.triggerPhase || "discovery";
+            if (phase === "discovery") discoveryUplift += pct;
+            if (phase === "design") designUplift += pct;
+            if (phase === "testing") testingUplift += pct;
+          }
+        }
+      });
 
-      const testing = base.testing * (
-        1 + (i.deploymentType === 'Brownfield' ? 0.2 : 0) + (i.nac > 0 ? 0.25 : 0) +
-        (i.wan > 0 ? 0.15 : 0) + (i.fw > 0 ? 0.2 : 0) + (i.dot1x === 'Yes' ? 0.25 : 0) +
-        (i.fabric === 'Yes' ? 0.25 : 0) + (extraDomains * 0.15)
-      );
+      const discovery = base.discovery * (1 + discoveryUplift);
+      const design = base.design * (1 + designUplift);
+      const testing = base.testing * (1 + testingUplift);
 
-      const implementationBase =
-        i.core * assumptions.implementationRates.core +
-        i.dist * assumptions.implementationRates.dist +
-        i.access * assumptions.implementationRates.access +
-        i.wan * assumptions.implementationRates.wan +
-        i.fw * assumptions.implementationRates.fw +
-        i.ap * assumptions.implementationRates.ap +
-        i.wlc * assumptions.implementationRates.wlc +
-        i.nac * assumptions.implementationRates.nac;
+      let implementationBase = 0;
+      schema.fields.forEach(field => {
+        if (field.role === "implementation") implementationBase += Number(inputs[field.key] || 0) * Number(field.rate || 0);
+      });
 
-      const implementation = implementationBase * (1 + (i.fabric === 'Yes' ? 0.15 : 0) + (extraDomains * 0.08));
-      const nac = i.nac > 0 ? assumptions.nacBaseline + (i.access * assumptions.nacPerAccess) : 0;
-      const hypercare = implementation * assumptions.hypercarePct;
-
+      const implementation = implementationBase * (1 + (inputs.fabric === "Yes" ? 0.15 : 0) + (extraDomains * 0.08));
+      const accessCount = Number(inputs.access || 0);
+      const nacCount = Number(inputs.nac || 0);
+      const nac = nacCount > 0 ? schema.rates.nacBaseline + (accessCount * schema.rates.nacPerAccess) : 0;
+      const hypercare = implementation * schema.rates.hypercarePct;
       const phases = { discovery, design, testing, implementation, nac, hypercare };
+
       const architectTotal =
-        phases.discovery * split.discovery.arch +
-        phases.design * split.design.arch +
-        phases.testing * split.testing.arch +
-        phases.implementation * split.implementation.arch +
-        phases.nac * split.nac.arch +
-        phases.hypercare * split.hypercare.arch;
-
+        phases.discovery * schema.phaseSplits.discovery.arch + phases.design * schema.phaseSplits.design.arch +
+        phases.testing * schema.phaseSplits.testing.arch + phases.implementation * schema.phaseSplits.implementation.arch +
+        phases.nac * schema.phaseSplits.nac.arch + phases.hypercare * schema.phaseSplits.hypercare.arch;
       const smeTotal =
-        phases.discovery * split.discovery.sme +
-        phases.design * split.design.sme +
-        phases.testing * split.testing.sme +
-        phases.implementation * split.implementation.sme +
-        phases.nac * split.nac.sme +
-        phases.hypercare * split.hypercare.sme;
+        phases.discovery * schema.phaseSplits.discovery.sme + phases.design * schema.phaseSplits.design.sme +
+        phases.testing * schema.phaseSplits.testing.sme + phases.implementation * schema.phaseSplits.implementation.sme +
+        phases.nac * schema.phaseSplits.nac.sme + phases.hypercare * schema.phaseSplits.hypercare.sme;
 
-      return {
-        size, phases, architectTotal, smeTotal,
-        totalEngineering: discovery + design + testing + implementation + nac + hypercare
-      };
+      return { size, phases, architectTotal, smeTotal, totalEngineering: discovery + design + testing + implementation + nac + hypercare };
+    }
+
+    function renderMapping(){
+      const body = document.getElementById("mappingBody");
+      body.innerHTML = schema.fields.map(field => {
+        let triggerText = "-";
+        if (field.role === "trigger") triggerText = `${field.triggerPhase || "discovery"} +${fmt((field.triggerPct || 0) * 100)}%`;
+        if (field.triggerAlso && field.triggerAlso.length) triggerText = (triggerText === "-" ? "" : triggerText + "; ") + field.triggerAlso.join("; ");
+        return `<tr><td>${field.label}</td><td>${field.role}${field.role2 ? " + " + field.role2 : ""}</td><td class="num">${field.role === "implementation" ? fmt(field.rate || 0) : "-"}</td><td>${triggerText || "-"}</td></tr>`;
+      }).join("");
     }
 
     function render(){
-      const i = inputs();
-      const r = calculate(i);
+      const inputs = getInputsObject();
+      const r = calculate(inputs);
       document.getElementById('projectSize').textContent = r.size;
       document.getElementById('totalEngineering').textContent = fmt(r.totalEngineering);
       document.getElementById('architectTotal').textContent = fmt(r.architectTotal);
@@ -1208,64 +398,118 @@ tbody tr:hover td{
         ['NAC Architecture & Integration (Baseline)', r.phases.nac, 0.5, r.phases.nac * 0.5, 0.5, r.phases.nac * 0.5],
         ['Hypercare', r.phases.hypercare, 0.3, r.phases.hypercare * 0.3, 0.7, r.phases.hypercare * 0.7]
       ];
-
       document.getElementById('phaseSummaryBody').innerHTML =
-        rows.map(row => `<tr>
-          <td>${row[0]}</td>
-          <td class="num">${fmt(row[1])}</td>
-          <td class="num">${row[2]}</td>
-          <td class="num">${fmt(row[3])}</td>
-          <td class="num">${row[4]}</td>
-          <td class="num">${fmt(row[5])}</td>
-        </tr>`).join('') +
-        `<tr><td><strong>Total Architect Hours</strong></td><td class="num" colspan="5"><strong>${fmt(r.architectTotal)}</strong></td></tr>
-         <tr><td><strong>Total SME Hours</strong></td><td class="num" colspan="5"><strong>${fmt(r.smeTotal)}</strong></td></tr>`;
+        rows.map(row => `<tr><td>${row[0]}</td><td class="num">${fmt(row[1])}</td><td class="num">${row[2]}</td><td class="num">${fmt(row[3])}</td><td class="num">${row[4]}</td><td class="num">${fmt(row[5])}</td></tr>`).join('') +
+        `<tr><td><strong>Total Architect Hours</strong></td><td class="num" colspan="5"><strong>${fmt(r.architectTotal)}</strong></td></tr><tr><td><strong>Total SME Hours</strong></td><td class="num" colspan="5"><strong>${fmt(r.smeTotal)}</strong></td></tr>`;
+      renderMapping();
+    }
+
+    function resetInputs(){
+      schema.fields.forEach(field => {
+        const el = document.getElementById(field.key);
+        if (el) el.value = field.default ?? (field.type === "select" ? ((field.options || [])[0] || "") : 0);
+      });
+      syncSpecialBehavior();
+      render();
+    }
+
+    function loadSample(){ Object.entries(SAMPLE_INPUTS).forEach(([k,v]) => { const el = document.getElementById(k); if (el) el.value = v; }); syncSpecialBehavior(); render(); }
+    function slugify(s){ return String(s || "").trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, ""); }
+
+    function addField(){
+      const label = document.getElementById("newLabel").value.trim();
+      let key = document.getElementById("newKey").value.trim();
+      const section = document.getElementById("newSection").value;
+      const type = document.getElementById("newType").value;
+      const role = document.getElementById("newRole").value;
+      const defaultValue = document.getElementById("newDefault").value.trim();
+      const options = document.getElementById("newOptions").value.trim();
+      const rate = Number(document.getElementById("newRate").value || 0);
+      const triggerPhase = document.getElementById("newTriggerPhase").value;
+      const triggerPct = Number(document.getElementById("newTriggerPct").value || 0);
+      const thresholdsText = document.getElementById("newThresholds").value.trim();
+
+      if (!label){ alert("Please enter a Field Label."); return; }
+      if (!key) key = slugify(label);
+      if (schema.fields.some(f => f.key === key)){ alert("Field Key already exists. Please choose a unique key."); return; }
+
+      const field = { key, label, type, section, default: type === "number" ? Number(defaultValue || 0) : (defaultValue || ((options.split(",")[0] || "").trim())), role };
+      if (type === "select"){ field.options = (options || "Yes,No").split(",").map(s => s.trim()).filter(Boolean); if (!field.options.length) field.options = ["Yes","No"]; }
+      if (role === "implementation") field.rate = rate;
+      if (role === "trigger"){ field.triggerPhase = triggerPhase; field.triggerPct = triggerPct; }
+      if (role === "size_driver"){
+        schema.sizing.driverKey = key;
+        try { const t = thresholdsText ? JSON.parse(thresholdsText) : schema.sizing.thresholds; schema.sizing.thresholds = { small:Number(t.small), medium:Number(t.medium), large:Number(t.large) }; }
+        catch { alert('Size Thresholds JSON is invalid. Example: {"small":20,"medium":75,"large":200}'); return; }
+      }
+
+      schema.fields.push(field);
+      saveSchema(schema);
+      renderInputs();
+      render();
+
+      ["newLabel","newKey","newDefault","newOptions","newRate","newTriggerPct","newThresholds"].forEach(id => document.getElementById(id).value = "");
+      document.getElementById("newRole").value = "none";
+      document.getElementById("newType").value = "number";
+      document.getElementById("newSection").value = "Infrastructure Totals (Across All Sites)";
     }
 
     function exportExcel(){
-      const tableHtml = document.querySelector('.page').outerHTML;
-      const blob = new Blob([tableHtml], {type:'application/vnd.ms-excel'});
+      const rows = [];
+      rows.push(["Field","Value"]);
+      schema.fields.forEach(f => rows.push([f.label, getFieldValue(f)]));
+      rows.push([]);
+      rows.push(["Phase","Total Hours","Architect %","Architect Hours","SME %","SME Hours"]);
+      const inputs = getInputsObject();
+      const r = calculate(inputs);
+      const phaseRows = [
+        ['Discovery', r.phases.discovery, 0.3, r.phases.discovery * 0.3, 0.7, r.phases.discovery * 0.7],
+        ['Design', r.phases.design, 0.7, r.phases.design * 0.7, 0.3, r.phases.design * 0.3],
+        ['Testing', r.phases.testing, 0.3, r.phases.testing * 0.3, 0.7, r.phases.testing * 0.7],
+        ['Implementation', r.phases.implementation, 0.3, r.phases.implementation * 0.3, 0.7, r.phases.implementation * 0.7],
+        ['NAC Architecture & Integration (Baseline)', r.phases.nac, 0.5, r.phases.nac * 0.5, 0.5, r.phases.nac * 0.5],
+        ['Hypercare', r.phases.hypercare, 0.3, r.phases.hypercare * 0.3, 0.7, r.phases.hypercare * 0.7]
+      ];
+      phaseRows.forEach(rw => rows.push(rw));
+      rows.push(["Total Architect Hours", r.architectTotal]);
+      rows.push(["Total SME Hours", r.smeTotal]);
+      const htmlTable = `<table border="1">${rows.map(row => `<tr>${(row.length ? row : [""]).map(cell => `<td>${cell ?? ""}</td>`).join("")}</tr>`).join("")}</table>`;
+      const blob = new Blob([htmlTable], {type:'application/vnd.ms-excel'});
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'campus_network_effort_Estimator.xls';
+      a.download = 'campus_network_effort_dynamic.xls';
       a.click();
       URL.revokeObjectURL(url);
     }
 
-    function resetInputs(){
-      Object.keys(sample).forEach(k => document.getElementById(k).value = sample[k]);
-      syncFabricDomains();
-      render();
-    }
-
-    ['core','dist','access','wan','fw','ap','wlc','nac','deploymentType','dot1x','fabric','domains']
-      .forEach(id => {
-        document.getElementById(id).addEventListener('input', render);
-        document.getElementById(id).addEventListener('change', render);
+    document.getElementById("loadSample").addEventListener("click", loadSample);
+    document.getElementById("resetInputs").addEventListener("click", resetInputs);
+    document.getElementById("exportExcel").addEventListener("click", exportExcel);
+    document.getElementById("printPdf").addEventListener("click", () => window.print());
+    document.getElementById("openBuilder").addEventListener("click", () => {
+      const panel = document.getElementById("builderPanel");
+      panel.style.display = panel.style.display === "none" ? "block" : "none";
+    });
+    document.getElementById("addFieldBtn").addEventListener("click", addField);
+    document.getElementById("saveSchemaBtn").addEventListener("click", () => {
+      schema.fields.forEach(field => {
+        const el = document.getElementById(field.key);
+        if (el) field.default = field.type === "number" ? Number(el.value || 0) : el.value;
       });
-
-    document.getElementById('loadSample').addEventListener('click', resetInputs);
-    document.getElementById('resetInputs').addEventListener('click', () => {
-      ['core','dist','access','wan','fw','ap','wlc','nac'].forEach(id => document.getElementById(id).value = 0);
-      document.getElementById('deploymentType').value = 'Greenfield';
-      document.getElementById('dot1x').value = 'No';
-      document.getElementById('fabric').value = 'No';
-      document.getElementById('domains').value = 1;
-      syncFabricDomains();
+      saveSchema(schema);
+      alert("Customization saved in this browser.");
+    });
+    document.getElementById("restoreDefaultsBtn").addEventListener("click", () => {
+      if (!confirm("Restore original default schema?")) return;
+      localStorage.removeItem(STORAGE_KEY);
+      schema = deepClone(defaultSchema);
+      renderInputs();
       render();
     });
-    document.getElementById('exportExcel').addEventListener('click', exportExcel);
-    document.getElementById('printPdf').addEventListener('click', () => window.print());
 
-    syncFabricDomains();
+    renderInputs();
     render();
   </script>
-
-<div class="footer-center">
-  Copyright © 2026 Kyndryl Inc. All rights reserved
-</div>
-
-
 </body>
 </html>
