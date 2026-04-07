@@ -40,7 +40,7 @@
     input,select{width:100%;height:34px;border:1px solid #bcc8da;border-radius:8px;padding:0 10px;font-size:14px;background:#fff;color:var(--text)}
     textarea{width:100%;min-height:120px;border:1px solid #bcc8da;border-radius:8px;padding:10px;font-size:13px;background:#fff;color:var(--text);resize:vertical}
     input:focus,select:focus,textarea:focus{outline:none;border-color:#ff7d6d;box-shadow:0 0 0 3px rgba(255,69,46,.12)}
-    .summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+    .summary-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:14px}
     .summary-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 14px 12px;box-shadow:var(--shadow);min-height:84px}
     .summary-card .label{display:block;font-size:12px;line-height:1.35;font-weight:800;text-transform:uppercase;color:#000;margin-bottom:6px;white-space:nowrap}
     .summary-card .value{font-size:20px;font-weight:900;line-height:1.1;color:var(--brand);font-family:"Segoe UI Black","Arial Black",sans-serif}
@@ -174,9 +174,10 @@
       <section class="stack">
         <div class="summary-grid">
           <div class="summary-card"><span class="label">Project Size</span><span class="value" id="projectSize">Large</span></div>
-          <div class="summary-card"><span class="label">Total Engineering Effort</span><span class="value" id="totalEngineering">0</span></div>
+          <div class="summary-card"><span class="label">Total Engineering Hours</span><span class="value" id="totalEngineering">0</span></div>
           <div class="summary-card"><span class="label">Total Architect Hours</span><span class="value" id="architectTotal">0</span></div>
           <div class="summary-card"><span class="label">Total SME Hours</span><span class="value" id="smeTotal">0</span></div>
+          <div class="summary-card"><span class="label">Total Network Admin Hours</span><span class="value" id="networkAdminTotal">0</span></div>
         </div>
 
         <section class="panel">
@@ -191,6 +192,8 @@
                   <th class="num">Architect Hours</th>
                   <th class="num">SME %</th>
                   <th class="num">SME Hours</th>
+                  <th class="num">Network Admin %</th>
+                  <th class="num">Network Admin Hours</th>
                 </tr>
               </thead>
               <tbody id="phaseSummaryBody"></tbody>
@@ -198,7 +201,7 @@
           </div>
         </section>
 
-        <section class="panel">
+        <!-- <section class="panel">
           <h2 class="panel-title">Active Formula Mapping</h2>
           <div class="panel-body">
             <table>
@@ -216,7 +219,7 @@
           </div>
         </section>
       </section>
-    </div>
+    </div>-->
 
     <div class="footer-center">Copyright © 2026 Kyndryl Inc. All rights reserved</div>
   </div>
@@ -224,13 +227,19 @@
   <script>
     const STORAGE_KEY = "campus_effort_dynamic_schema_v1";
     const SAMPLE_INPUTS = {core:10,dist:20,access:100,wan:5,fw:5,ap:10,wlc:2,nac:2,deploymentType:"Greenfield",dot1x:"No",fabric:"No",domains:1};
+    const ADMIN_PARAM_VALUES = new Set(["1", "true", "yes", "internal"]);
+    const isInternalAdmin = ADMIN_PARAM_VALUES.has((new URLSearchParams(window.location.search).get("admin") || "").toLowerCase());
 
     const defaultSchema = {
       sizing: { driverKey: "access", thresholds: { small: 20, medium: 75, large: 200 } },
       rates: { nacBaseline: 60, nacPerAccess: 1.5, hypercarePct: 0.04 },
       phaseSplits: {
-        discovery:{arch:0.3,sme:0.7}, design:{arch:0.7,sme:0.3}, testing:{arch:0.3,sme:0.7},
-        implementation:{arch:0.3,sme:0.7}, nac:{arch:0.5,sme:0.5}, hypercare:{arch:0.3,sme:0.7}
+        discovery:{arch:0.2,sme:0.5,admin:0.3},
+        design:{arch:0.7,sme:0.3,admin:0},
+        testing:{arch:0.2,sme:0.4,admin:0.4},
+        implementation:{arch:0.3,sme:0.5,admin:0.2},
+        nac:{arch:0.5,sme:0.5,admin:0},
+        hypercare:{arch:0.2,sme:0.5,admin:0.3}
       },
       base: {
         Small:{discovery:36,design:60,testing:8},
@@ -255,12 +264,29 @@
     };
 
     function deepClone(x){ return JSON.parse(JSON.stringify(x)); }
-    function loadSchema(){ const raw = localStorage.getItem(STORAGE_KEY); if (!raw) return deepClone(defaultSchema); try { return JSON.parse(raw); } catch { return deepClone(defaultSchema); } }
+    function normalizeSchema(saved){
+      const merged = deepClone(defaultSchema);
+      if (!saved || typeof saved !== "object") return merged;
+      merged.sizing = { ...merged.sizing, ...(saved.sizing || {}) };
+      merged.rates = { ...merged.rates, ...(saved.rates || {}) };
+      Object.keys(merged.phaseSplits).forEach(key => {
+        merged.phaseSplits[key] = { ...merged.phaseSplits[key], ...((saved.phaseSplits || {})[key] || {}) };
+      });
+      merged.base = { ...merged.base, ...(saved.base || {}) };
+      merged.fields = Array.isArray(saved.fields) ? saved.fields : merged.fields;
+      return merged;
+    }
+    function loadSchema(){ const raw = localStorage.getItem(STORAGE_KEY); if (!raw) return deepClone(defaultSchema); try { return normalizeSchema(JSON.parse(raw)); } catch { return deepClone(defaultSchema); } }
     function saveSchema(schema){ localStorage.setItem(STORAGE_KEY, JSON.stringify(schema)); }
     let schema = loadSchema();
 
     function fmt(v){ const n = Number(v || 0); return n.toFixed(2).replace(/\.00$/,'').replace(/(\.\d*[1-9])0$/,'$1'); }
-    function getFieldValue(field){ const el = document.getElementById(field.key); if (!el) return field.default ?? 0; if (field.type === "number") return Number(el.value || 0); return el.value; }
+    function getFieldValue(field){
+      const el = document.getElementById(field.key);
+      if (!el) return field.type === "number" ? 0 : "";
+      if (field.type === "number") return Number(el.value || 0);
+      return el.value;
+    }
     function groupedFields(){ const groups = {}; schema.fields.forEach(f => { if (!groups[f.section]) groups[f.section] = []; groups[f.section].push(f); }); return groups; }
 
     function renderInputs(){
@@ -274,7 +300,10 @@
               <div class="field">
                 <label for="${field.key}">${field.label}</label>
                 ${field.type === "select"
-                  ? `<select id="${field.key}">${(field.options || []).map(opt => `<option value="${opt}">${opt}</option>`).join("")}</select>`
+                  ? `<select id="${field.key}">
+                      <option value=""></option>
+                      ${(field.options || []).map(opt => `<option value="${opt}">${opt}</option>`).join("")}
+                    </select>`
                   : `<input id="${field.key}" type="number" min="0" step="1" value="${field.default ?? 0}" />`
                 }
               </div>
@@ -297,12 +326,27 @@
       const fabricField = document.getElementById("fabric");
       const domainsField = document.getElementById("domains");
       if (fabricField && domainsField){
-        if (fabricField.value === "No"){ domainsField.value = 1; domainsField.disabled = true; }
-        else { domainsField.disabled = false; if (Number(domainsField.value) < 1) domainsField.value = 1; }
+        if (fabricField.value === "No"){
+          domainsField.value = 0;
+          domainsField.disabled = true;
+        } else if (fabricField.value === "Yes"){
+          domainsField.disabled = false;
+          if (domainsField.value === "" || Number(domainsField.value) < 1) domainsField.value = 1;
+        } else {
+          domainsField.disabled = false;
+          domainsField.value = "";
+        }
       }
     }
 
     function getInputsObject(){ const obj = {}; schema.fields.forEach(f => obj[f.key] = getFieldValue(f)); return obj; }
+    function hasAnyProjectInput(inputs){
+      return schema.fields.some(field => {
+        const value = inputs[field.key];
+        if (field.type === "number") return Number(value || 0) > 0;
+        return String(value || "").trim() !== "";
+      });
+    }
 
     function getProjectSize(inputs){
       const driverKey = schema.sizing.driverKey;
@@ -317,6 +361,10 @@
     function hasActive(field, value){ if (field.type === "select") return String(value).toLowerCase() === "yes"; return Number(value || 0) > 0; }
 
     function calculate(inputs){
+      if (!hasAnyProjectInput(inputs)) {
+        const phases = { discovery:0, design:0, testing:0, implementation:0, nac:0, hypercare:0 };
+        return { size:"-", phases, architectTotal:0, smeTotal:0, networkAdminTotal:0, totalEngineering:0 };
+      }
       const size = getProjectSize(inputs);
       const base = schema.base[size];
       const extraDomains = Math.max(Number(inputs.domains || 1) - 1, 0);
@@ -368,8 +416,19 @@
         phases.discovery * schema.phaseSplits.discovery.sme + phases.design * schema.phaseSplits.design.sme +
         phases.testing * schema.phaseSplits.testing.sme + phases.implementation * schema.phaseSplits.implementation.sme +
         phases.nac * schema.phaseSplits.nac.sme + phases.hypercare * schema.phaseSplits.hypercare.sme;
+      const networkAdminTotal =
+        phases.discovery * schema.phaseSplits.discovery.admin + phases.design * schema.phaseSplits.design.admin +
+        phases.testing * schema.phaseSplits.testing.admin + phases.implementation * schema.phaseSplits.implementation.admin +
+        phases.nac * schema.phaseSplits.nac.admin + phases.hypercare * schema.phaseSplits.hypercare.admin;
 
-      return { size, phases, architectTotal, smeTotal, totalEngineering: discovery + design + testing + implementation + nac + hypercare };
+      return {
+        size,
+        phases,
+        architectTotal,
+        smeTotal,
+        networkAdminTotal,
+        totalEngineering: discovery + design + testing + implementation + nac + hypercare
+      };
     }
 
     function renderMapping(){
@@ -389,26 +448,34 @@
       document.getElementById('totalEngineering').textContent = fmt(r.totalEngineering);
       document.getElementById('architectTotal').textContent = fmt(r.architectTotal);
       document.getElementById('smeTotal').textContent = fmt(r.smeTotal);
+      document.getElementById('networkAdminTotal').textContent = fmt(r.networkAdminTotal);
 
       const rows = [
-        ['Discovery', r.phases.discovery, 0.3, r.phases.discovery * 0.3, 0.7, r.phases.discovery * 0.7],
-        ['Design', r.phases.design, 0.7, r.phases.design * 0.7, 0.3, r.phases.design * 0.3],
-        ['Testing', r.phases.testing, 0.3, r.phases.testing * 0.3, 0.7, r.phases.testing * 0.7],
-        ['Implementation', r.phases.implementation, 0.3, r.phases.implementation * 0.3, 0.7, r.phases.implementation * 0.7],
-        ['NAC Architecture & Integration (Baseline)', r.phases.nac, 0.5, r.phases.nac * 0.5, 0.5, r.phases.nac * 0.5],
-        ['Hypercare', r.phases.hypercare, 0.3, r.phases.hypercare * 0.3, 0.7, r.phases.hypercare * 0.7]
+        ['Discovery', r.phases.discovery, 0.2, r.phases.discovery * 0.2, 0.5, r.phases.discovery * 0.5, 0.3, r.phases.discovery * 0.3],
+        ['Design', r.phases.design, 0.7, r.phases.design * 0.7, 0.3, r.phases.design * 0.3, 0, 0],
+        ['Testing', r.phases.testing, 0.2, r.phases.testing * 0.2, 0.4, r.phases.testing * 0.4, 0.4, r.phases.testing * 0.4],
+        ['Implementation', r.phases.implementation, 0.3, r.phases.implementation * 0.3, 0.5, r.phases.implementation * 0.5, 0.2, r.phases.implementation * 0.2],
+        ['NAC Architecture & Integration (Baseline)', r.phases.nac, 0.5, r.phases.nac * 0.5, 0.5, r.phases.nac * 0.5, 0, 0],
+        ['Hypercare', r.phases.hypercare, 0.2, r.phases.hypercare * 0.2, 0.5, r.phases.hypercare * 0.5, 0.3, r.phases.hypercare * 0.3]
       ];
       document.getElementById('phaseSummaryBody').innerHTML =
-        rows.map(row => `<tr><td>${row[0]}</td><td class="num">${fmt(row[1])}</td><td class="num">${row[2]}</td><td class="num">${fmt(row[3])}</td><td class="num">${row[4]}</td><td class="num">${fmt(row[5])}</td></tr>`).join('') +
-        `<tr><td><strong>Total Architect Hours</strong></td><td class="num" colspan="5"><strong>${fmt(r.architectTotal)}</strong></td></tr><tr><td><strong>Total SME Hours</strong></td><td class="num" colspan="5"><strong>${fmt(r.smeTotal)}</strong></td></tr>`;
+        rows.map(row => `<tr><td>${row[0]}</td><td class="num">${fmt(row[1])}</td><td class="num">${row[2]}</td><td class="num">${fmt(row[3])}</td><td class="num">${row[4]}</td><td class="num">${fmt(row[5])}</td><td class="num">${row[6]}</td><td class="num">${fmt(row[7])}</td></tr>`).join('') +
+        `<tr><td><strong>Total Architect Hours</strong></td><td class="num" colspan="7"><strong>${fmt(r.architectTotal)}</strong></td></tr><tr><td><strong>Total SME Hours</strong></td><td class="num" colspan="7"><strong>${fmt(r.smeTotal)}</strong></td></tr><tr><td><strong>Total Network Admin Hours</strong></td><td class="num" colspan="7"><strong>${fmt(r.networkAdminTotal)}</strong></td></tr>`;
       renderMapping();
     }
 
     function resetInputs(){
       schema.fields.forEach(field => {
         const el = document.getElementById(field.key);
-        if (el) el.value = field.default ?? (field.type === "select" ? ((field.options || [])[0] || "") : 0);
+        if (!el) return;
+
+        if (field.type === "number") {
+          el.value = 0;
+        } else {
+          el.value = "";
+        }
       });
+
       syncSpecialBehavior();
       render();
     }
@@ -459,20 +526,21 @@
       rows.push(["Field","Value"]);
       schema.fields.forEach(f => rows.push([f.label, getFieldValue(f)]));
       rows.push([]);
-      rows.push(["Phase","Total Hours","Architect %","Architect Hours","SME %","SME Hours"]);
+      rows.push(["Phase","Total Hours","Architect %","Architect Hours","SME %","SME Hours","Network Admin %","Network Admin Hours"]);
       const inputs = getInputsObject();
       const r = calculate(inputs);
       const phaseRows = [
-        ['Discovery', r.phases.discovery, 0.3, r.phases.discovery * 0.3, 0.7, r.phases.discovery * 0.7],
-        ['Design', r.phases.design, 0.7, r.phases.design * 0.7, 0.3, r.phases.design * 0.3],
-        ['Testing', r.phases.testing, 0.3, r.phases.testing * 0.3, 0.7, r.phases.testing * 0.7],
-        ['Implementation', r.phases.implementation, 0.3, r.phases.implementation * 0.3, 0.7, r.phases.implementation * 0.7],
-        ['NAC Architecture & Integration (Baseline)', r.phases.nac, 0.5, r.phases.nac * 0.5, 0.5, r.phases.nac * 0.5],
-        ['Hypercare', r.phases.hypercare, 0.3, r.phases.hypercare * 0.3, 0.7, r.phases.hypercare * 0.7]
+        ['Discovery', r.phases.discovery, 0.2, r.phases.discovery * 0.2, 0.5, r.phases.discovery * 0.5, 0.3, r.phases.discovery * 0.3],
+        ['Design', r.phases.design, 0.7, r.phases.design * 0.7, 0.3, r.phases.design * 0.3, 0, 0],
+        ['Testing', r.phases.testing, 0.2, r.phases.testing * 0.2, 0.4, r.phases.testing * 0.4, 0.4, r.phases.testing * 0.4],
+        ['Implementation', r.phases.implementation, 0.3, r.phases.implementation * 0.3, 0.5, r.phases.implementation * 0.5, 0.2, r.phases.implementation * 0.2],
+        ['NAC Architecture & Integration (Baseline)', r.phases.nac, 0.5, r.phases.nac * 0.5, 0.5, r.phases.nac * 0.5, 0, 0],
+        ['Hypercare', r.phases.hypercare, 0.2, r.phases.hypercare * 0.2, 0.5, r.phases.hypercare * 0.5, 0.3, r.phases.hypercare * 0.3]
       ];
       phaseRows.forEach(rw => rows.push(rw));
       rows.push(["Total Architect Hours", r.architectTotal]);
       rows.push(["Total SME Hours", r.smeTotal]);
+      rows.push(["Total Network Admin Hours", r.networkAdminTotal]);
       const htmlTable = `<table border="1">${rows.map(row => `<tr>${(row.length ? row : [""]).map(cell => `<td>${cell ?? ""}</td>`).join("")}</tr>`).join("")}</table>`;
       const blob = new Blob([htmlTable], {type:'application/vnd.ms-excel'});
       const url = URL.createObjectURL(blob);
@@ -487,10 +555,15 @@
     document.getElementById("resetInputs").addEventListener("click", resetInputs);
     document.getElementById("exportExcel").addEventListener("click", exportExcel);
     document.getElementById("printPdf").addEventListener("click", () => window.print());
-    document.getElementById("openBuilder").addEventListener("click", () => {
-      const panel = document.getElementById("builderPanel");
-      panel.style.display = panel.style.display === "none" ? "block" : "none";
-    });
+    if (isInternalAdmin) {
+      document.getElementById("openBuilder").addEventListener("click", () => {
+        const panel = document.getElementById("builderPanel");
+        panel.style.display = panel.style.display === "none" ? "block" : "none";
+      });
+    } else {
+      document.getElementById("openBuilder").style.display = "none";
+      document.getElementById("builderPanel").style.display = "none";
+    }
     document.getElementById("addFieldBtn").addEventListener("click", addField);
     document.getElementById("saveSchemaBtn").addEventListener("click", () => {
       schema.fields.forEach(field => {
